@@ -12,7 +12,7 @@
         <script>
             const config = {
                 fontSize: 14,
-                fadeSpeed: 0.02,       // opacity lost per frame (lower = slower fade)
+                fadeSpeed: 0.03,       // opacity lost per frame (lower = slower fade)
                 frameDelay: 80,        // ms between frames (lower = faster animation)
                 speedMin: 0.5,         // minimum drop speed (rows per frame)
                 speedMax: 2.0,         // maximum drop speed (rows per frame)
@@ -25,7 +25,7 @@
 
             const canvas = document.getElementById('matrix-rain');
             const ctx = canvas.getContext('2d');
-            let columns, drops, speeds, grid;
+            let columns, drops, speeds, grid, prevHeads;
 
             function init() {
                 canvas.width = canvas.offsetWidth;
@@ -33,7 +33,8 @@
                 columns = Math.floor(canvas.width / config.fontSize);
                 drops = Array.from({length: columns}, () => Math.random() * -canvas.height / config.fontSize);
                 speeds = Array.from({length: columns}, () => config.speedMin + Math.random() * (config.speedMax - config.speedMin));
-                grid = Array.from({length: columns}, () => ({}));
+                grid = Array.from({length: columns}, () => ({})); // grid[col][row] = char
+                prevHeads = new Array(columns).fill(-1);
             }
 
             let lastTime = 0;
@@ -43,41 +44,33 @@
                 if (time - lastTime < config.frameDelay) return;
                 lastTime = time;
 
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = config.fadeSpeed;
                 ctx.fillStyle = config.bgColor;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1;
                 ctx.font = config.fontSize + 'px monospace';
 
                 for (let i = 0; i < columns; i++) {
                     const x = i * config.fontSize;
                     const head = Math.floor(drops[i]);
 
-                    const prevHead = Math.floor(drops[i] - speeds[i]);
-                    for (let r = Math.max(0, prevHead + 1); r < head; r++) {
-                        if (!grid[i][r]) grid[i][r] = { char: config.chars[Math.floor(Math.random() * config.chars.length)], opacity: 1 };
-                    }
-                    if (head >= 0) {
-                        if (!grid[i][head]) grid[i][head] = { char: config.chars[Math.floor(Math.random() * config.chars.length)], opacity: 1 };
-                        else grid[i][head].opacity = 1;
+                    ctx.fillStyle = config.trailColor;
+                    for (let r = Math.max(0, prevHeads[i]); r < head; r++) {
+                        if (!grid[i][r]) grid[i][r] = config.chars[Math.floor(Math.random() * config.chars.length)];
+                        ctx.fillText(grid[i][r], x, r * config.fontSize);
                     }
 
-                    for (const row in grid[i]) {
-                        const cell = grid[i][row];
-                        const r = +row;
-                        if (r === head) {
-                            ctx.globalAlpha = 1;
-                            ctx.fillStyle = config.headColor;
-                        } else {
-                            cell.opacity -= config.fadeSpeed;
-                            if (cell.opacity <= 0) { delete grid[i][row]; continue; }
-                            ctx.globalAlpha = cell.opacity;
-                            ctx.fillStyle = config.trailColor;
-                        }
-                        ctx.fillText(cell.char, x, r * config.fontSize);
+                    if (head >= 0) {
+                        if (!grid[i][head]) grid[i][head] = config.chars[Math.floor(Math.random() * config.chars.length)];
+                        ctx.fillStyle = config.headColor;
+                        ctx.fillText(grid[i][head], x, head * config.fontSize);
                     }
+
+                    prevHeads[i] = head;
 
                     if (drops[i] * config.fontSize > canvas.height && Math.random() < config.resetChance) {
                         drops[i] = 0;
+                        prevHeads[i] = -1;
                     }
                     drops[i] += speeds[i];
                 }
