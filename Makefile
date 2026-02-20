@@ -9,7 +9,6 @@ SWIFTFLAGS  = \
     -target $(TARGET) \
     -module-name MatrixScreenSaver \
     -framework ScreenSaver \
-    -framework WebKit \
     -framework AppKit
 
 .PHONY: all install uninstall clean
@@ -24,6 +23,7 @@ $(BUNDLE): MatrixScreenSaver.swift Info.plist index.html
 	cp index.html $(BUNDLE)/Contents/Resources/index.html
 
 install: all
+	rm -rf ~/Library/Screen\ Savers/$(BUNDLE)
 	cp -R $(BUNDLE) ~/Library/Screen\ Savers/
 	@echo "Installed. Open System Settings > Screen Saver to activate."
 
