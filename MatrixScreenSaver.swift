@@ -49,7 +49,7 @@ final class MatrixScreenSaverView: ScreenSaverView {
     private var trailSlider:   NSSlider!
     private var trailWell:     NSColorWell!
     private var headWell:      NSColorWell!
-    private var glyphsField:   NSTextField!
+    private var glyphsView:    NSTextView!
 
     // MARK: - Init
 
@@ -241,7 +241,7 @@ final class MatrixScreenSaverView: ScreenSaverView {
 
     private func buildSheet() -> NSWindow {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 380, height: 340),
+            contentRect: NSRect(x: 0, y: 0, width: 380, height: 390),
             styleMask: [.titled],
             backing: .buffered,
             defer: false
@@ -253,9 +253,23 @@ final class MatrixScreenSaverView: ScreenSaverView {
         trailSlider = makeSlider(min: 1,    max: 15,  value: trailLen)
         trailWell   = makeColorWell(trailColor)
         headWell    = makeColorWell(headColor)
-        glyphsField = NSTextField(string: String(glyphs))
-        glyphsField.translatesAutoresizingMaskIntoConstraints = false
-        glyphsField.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        let glyphsScroll = NSScrollView()
+        glyphsScroll.translatesAutoresizingMaskIntoConstraints = false
+        glyphsScroll.hasVerticalScroller = true
+        glyphsScroll.hasHorizontalScroller = false
+        glyphsScroll.borderType = .bezelBorder
+        glyphsScroll.heightAnchor.constraint(equalToConstant: 70).isActive = true
+
+        glyphsView = NSTextView()
+        glyphsView.isEditable = true
+        glyphsView.isRichText = false
+        glyphsView.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        glyphsView.string = String(glyphs)
+        glyphsView.textContainer?.widthTracksTextView = true
+        glyphsView.isHorizontallyResizable = false
+        glyphsView.isVerticallyResizable = true
+        glyphsView.autoresizingMask = [.width]
+        glyphsScroll.documentView = glyphsView
 
         let rows: [(String, NSView)] = [
             ("Character Size:", sizeSlider),
@@ -263,7 +277,7 @@ final class MatrixScreenSaverView: ScreenSaverView {
             ("Trail Length:",   trailSlider),
             ("Trail Color:",    trailWell),
             ("Head Color:",     headWell),
-            ("Glyphs:",         glyphsField),
+            ("Glyphs:",         glyphsScroll),
         ]
 
         let vStack = NSStackView()
@@ -332,7 +346,7 @@ final class MatrixScreenSaverView: ScreenSaverView {
         trailLen   = trailSlider.doubleValue
         trailColor = trailWell.color
         headColor  = headWell.color
-        let str    = glyphsField.stringValue
+        let str    = glyphsView.string
         glyphs     = Array(str.isEmpty ? Self.defaultGlyphs : str)
         saveSettings()
         numCols = 0; accumRep = nil   // force re-setup with new params
@@ -350,7 +364,7 @@ final class MatrixScreenSaverView: ScreenSaverView {
         trailSlider.doubleValue = 12
         trailWell.color  = NSColor(calibratedRed: 0,   green: 0.65, blue: 0,   alpha: 1)
         headWell.color   = NSColor(calibratedRed: 0.9, green: 1.0,  blue: 0.9, alpha: 1)
-        glyphsField.stringValue = Self.defaultGlyphs
+        glyphsView.string = Self.defaultGlyphs
     }
 
     @objc private func cancelClicked(_ sender: Any) {
