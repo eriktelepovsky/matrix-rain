@@ -24,6 +24,7 @@ $(BUNDLE): MatrixScreenSaver.swift Info.plist
 install: all
 	rm -rf ~/Library/Screen\ Savers/$(BUNDLE)
 	cp -R $(BUNDLE) ~/Library/Screen\ Savers/
+	rm -rf $(BUNDLE)
 	-pkill -x "legacyScreenSaver" 2>/dev/null; true
 	@echo "Installed and reloaded."
 
