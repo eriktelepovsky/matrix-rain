@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Rain</title>
+    <style>
+        :root {
+            --green:       hsl(120, 100%, 33%);
+            --green-glow:  hsl(120, 100%, 50%);
+            --green-dim:   hsl(120, 100%, 10%);
+            --border:      rgba(255, 255, 255, 0.07);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #000;
+            color: rgba(255, 255, 255, 0.82);
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* scanline texture */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0, 0, 0, 0.04) 3px,
+                rgba(0, 0, 0, 0.04) 4px
+            );
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        #matrix-rain {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: clamp(3rem, 8vw, 7rem) clamp(1.5rem, 7vw, 9rem);
+            padding-bottom: clamp(3rem, 7vw, 6rem);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-eyebrow {
+            font-size: 0.65rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 1.25rem;
+            opacity: 0;
+            animation: rise 0.7s 0.15s cubic-bezier(.22,1,.36,1) forwards;
+        }
+
+        .hero-title {
+            font-size: clamp(3.5rem, 13vw, 10rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 0.88;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            animation: rise 0.7s 0.3s cubic-bezier(.22,1,.36,1) forwards;
+        }
+
+        .hero-title em {
+            font-style: normal;
+            color: var(--green);
+            text-shadow: 0 0 60px var(--green), 0 0 120px var(--green-dim);
+        }
+
+        .hero-desc {
+            max-width: 420px;
+            font-size: clamp(0.82rem, 1.5vw, 0.95rem);
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: rise 0.7s 0.45s cubic-bezier(.22,1,.36,1) forwards;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: rise 0.7s 0.6s cubic-bezier(.22,1,.36,1) forwards;
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-block;
+            font-family: inherit;
+            font-size: 0.72rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 0.75rem 1.75rem;
+            border: 1px solid;
+            transition: background 0.18s, color 0.18s, box-shadow 0.18s, border-color 0.18s;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-outline {
+            color: rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.18);
+            background: transparent;
+        }
+        .btn-outline:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .btn-green {
+            color: var(--green);
+            border-color: var(--green);
+            background: transparent;
+        }
+        .btn-green:hover {
+            background: var(--green);
+            color: #000;
+            box-shadow: 0 0 28px var(--green-dim), 0 0 8px var(--green-dim);
+        }
+
+        /* ── PREVIEWS ── */
+        .previews {
+            padding: clamp(4rem, 9vw, 8rem) clamp(1.5rem, 7vw, 9rem);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-size: 0.6rem;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.25);
+            margin-bottom: 2.5rem;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            border: 1px solid var(--border);
+            background: var(--border);
+            gap: 1px;
+        }
+
+        @media (max-width: 700px) {
+            .preview-grid { grid-template-columns: repeat(2, 1fr); }
+            .preview-grid .card:last-child { grid-column: span 2; }
+        }
+
+        .card {
+            background: #000;
+            padding: 2rem 1.5rem 1.75rem;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.2s;
+        }
+
+        .card:hover { background: rgba(255, 255, 255, 0.025); }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--c);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s cubic-bezier(.22,1,.36,1);
+        }
+        .card:hover::after { transform: scaleX(1); }
+
+        .card-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--c);
+            box-shadow: 0 0 10px var(--c);
+            flex-shrink: 0;
+        }
+
+        .card-name {
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s;
+        }
+        .card:hover .card-name { color: rgba(255, 255, 255, 0.9); }
+
+        .card-arrow {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.15);
+            margin-top: auto;
+            transition: color 0.2s, transform 0.25s;
+        }
+        .card:hover .card-arrow {
+            color: rgba(255, 255, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 7vw, 9rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .footer-id {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.18);
+            text-decoration: none;
+        }
+        .footer-id:hover { color: rgba(255, 255, 255, 0.45); }
+
+        .footer-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        /* ── ANIMATION ── */
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix-rain"></canvas>
+
+<div class="page">
+
+    <section class="hero">
+        <p class="hero-eyebrow">Open Source — MIT License</p>
+        <h1 class="hero-title">MATRIX<br><em>RAIN</em></h1>
+        <p class="hero-desc">A Matrix-style falling character rain — available as a JavaScript canvas library and a native macOS screensaver.</p>
+        <div class="hero-actions">
+            <a href="https://github.com/eriktelepovsky/matrix-rain" class="btn btn-outline" target="_blank" rel="noopener">View on GitHub</a>
+            <a href="screensaver/MatrixSaver.zip" class="btn btn-green" download>Download Screensaver</a>
+        </div>
+    </section>
+
+    <section class="previews">
+        <p class="section-label">Live Previews</p>
+        <div class="preview-grid">
+            <a href="previews/matrix.html" class="card" style="--c: hsl(120,100%,33%)">
+                <div class="card-dot"></div>
+                <span class="card-name">Matrix</span>
+                <span class="card-arrow">→</span>
+            </a>
+            <a href="previews/rain.html" class="card" style="--c: #0af">
+                <div class="card-dot"></div>
+                <span class="card-name">Rain</span>
+                <span class="card-arrow">→</span>
+            </a>
+            <a href="previews/snow.html" class="card" style="--c: #dde">
+                <div class="card-dot"></div>
+                <span class="card-name">Snow</span>
+                <span class="card-arrow">→</span>
+            </a>
+            <a href="previews/hearts.html" class="card" style="--c: #e33">
+                <div class="card-dot"></div>
+                <span class="card-name">Hearts</span>
+                <span class="card-arrow">→</span>
+            </a>
+            <a href="previews/pacman.html" class="card" style="--c: #fc0">
+                <div class="card-dot"></div>
+                <span class="card-name">Pac-Man</span>
+                <span class="card-arrow">→</span>
+            </a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <a href="https://github.com/eriktelepovsky/matrix-rain" class="footer-id" target="_blank" rel="noopener">
+            eriktelepovsky / matrix-rain
+        </a>
+        <div class="footer-actions">
+            <a href="https://github.com/eriktelepovsky/matrix-rain" class="btn btn-outline" target="_blank" rel="noopener" style="font-size:0.65rem;padding:0.6rem 1.2rem">GitHub</a>
+            <a href="screensaver/MatrixSaver.zip" class="btn btn-green" download style="font-size:0.65rem;padding:0.6rem 1.2rem">Download .saver</a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+function MatrixRain(config) {
+    const canvas = document.getElementById('matrix-rain');
+    const ctx = canvas.getContext('2d');
+    let columns, drops, speeds, grid, prevHeads;
+
+    function init() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        columns   = Math.floor(canvas.width / config.fontSize);
+        drops     = Array.from({length: columns}, () => Math.random() * -canvas.height / config.fontSize);
+        speeds    = Array.from({length: columns}, () => config.speedMin + Math.random() * (config.speedMax - config.speedMin));
+        grid      = Array.from({length: columns}, () => ({}));
+        prevHeads = new Array(columns).fill(-1);
+        ctx.fillStyle = config.bgColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    let lastTime = 0;
+
+    function draw(time) {
+        requestAnimationFrame(draw);
+        if (time - lastTime < config.frameDelay) return;
+        lastTime = time;
+
+        ctx.globalAlpha = config.fadeSpeed;
+        ctx.fillStyle = config.bgColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1;
+        ctx.font = config.fontSize + 'px monospace';
+
+        for (let i = 0; i < columns; i++) {
+            const x    = i * config.fontSize;
+            const head = Math.floor(drops[i]);
+
+            ctx.fillStyle = config.trailColor;
+            for (let r = Math.max(0, prevHeads[i]); r < head; r++) {
+                if (!grid[i][r]) grid[i][r] = config.chars[Math.floor(Math.random() * config.chars.length)];
+                ctx.fillText(grid[i][r], x, r * config.fontSize);
+            }
+
+            if (head >= 0) {
+                if (!grid[i][head]) grid[i][head] = config.chars[Math.floor(Math.random() * config.chars.length)];
+                ctx.fillStyle = config.headColor;
+                ctx.fillText(grid[i][head], x, head * config.fontSize);
+            }
+
+            prevHeads[i] = head;
+
+            if (drops[i] * config.fontSize > canvas.height && Math.random() < config.resetChance) {
+                drops[i]     = 0;
+                prevHeads[i] = -1;
+            }
+            drops[i] += speeds[i];
+        }
+    }
+
+    let lastWidth = canvas.offsetWidth;
+    window.addEventListener('resize', () => {
+        if (canvas.offsetWidth !== lastWidth) {
+            lastWidth = canvas.offsetWidth;
+            init();
+        }
+    });
+
+    init();
+    draw();
+}
+
+MatrixRain({
+    fontSize:    14,
+    fadeSpeed:   0.04,
+    frameDelay:  80,
+    speedMin:    0.4,
+    speedMax:    1.6,
+    resetChance: 0.4,
+    bgColor:     '#000000',
+    trailColor:  'hsl(120, 100%, 22%)',
+    headColor:   'hsl(120, 100%, 62%)',
+    chars:       'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789',
+});
+</script>
+
+</body>
+</html>
