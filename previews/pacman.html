@@ -8,8 +8,9 @@
     </head>
     <body>
         <canvas id="matrix-rain"></canvas>
+        <script src="matrix-rain.js"></script>
         <script>
-            const config = {
+            MatrixRain({
                 fontSize:    14,
                 fadeSpeed:   0.03,
                 frameDelay:  80,
@@ -20,8 +21,7 @@
                 trailColor:  'hsl(45, 100%, 40%)',
                 headColor:   'hsla(55, 100%, 90%, 1)',
                 chars:       'C(·oO·:ᗤᗧ·⚬',
-            };
+            });
         </script>
-        <script src="rain-engine.js"></script>
     </body>
 </html>

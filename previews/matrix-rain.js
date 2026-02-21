@@ -1,7 +1,4 @@
-// Matrix rain engine — shared by all preview pages.
-// Each page defines `window.config` before loading this script.
-
-(function () {
+function MatrixRain(config) {
     const canvas = document.getElementById('matrix-rain');
     const ctx = canvas.getContext('2d');
     let columns, drops, speeds, grid, prevHeads;
@@ -67,4 +64,4 @@
 
     init();
     draw();
-})();
+}
