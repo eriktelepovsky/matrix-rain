@@ -4,6 +4,20 @@ A Matrix-style falling character rain screensaver for macOS, built in native Swi
 
 ![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue)
 
+## Screenshots
+
+![mockups](screenshots/mockups.png)
+
+## Previews
+
+| Theme | Preview |
+|---|---|
+| Matrix | [previews/matrix.html](previews/matrix.html) |
+| Rain | [previews/rain.html](previews/rain.html) |
+| Snow | [previews/snow.html](previews/snow.html) |
+| Hearts | [previews/hearts.html](previews/hearts.html) |
+| Pac-Man | [previews/pacman.html](previews/pacman.html) |
+
 ## Features
 
 - Katakana and numeric characters falling in columns
