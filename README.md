@@ -4,7 +4,7 @@ A Matrix-style falling character rain — available as a **JavaScript canvas lib
 
 **[Live demo → eriktelepovsky.github.io/matrix-rain](https://eriktelepovsky.github.io/matrix-rain/)**
 
-![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue)
+![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-yellow)](https://buymeacoffee.com/eriktelepovsky)
 
 ## Screenshots
 
