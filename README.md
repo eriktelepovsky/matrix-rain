@@ -2,6 +2,8 @@
 
 A Matrix-style falling character rain — available as a **JavaScript canvas library** and as a **native macOS screensaver**.
 
+**[Live demo → eriktelepovsky.github.io/matrix-rain](https://eriktelepovsky.github.io/matrix-rain/)**
+
 ![macOS](https://img.shields.io/badge/macOS-13.0%2B-blue)
 
 ## Screenshots
@@ -12,11 +14,11 @@ A Matrix-style falling character rain — available as a **JavaScript canvas lib
 
 | Theme | Preview |
 |---|---|
-| Matrix | [previews/matrix.html](previews/matrix.html) |
-| Rain | [previews/rain.html](previews/rain.html) |
-| Snow | [previews/snow.html](previews/snow.html) |
-| Hearts | [previews/hearts.html](previews/hearts.html) |
-| Pac-Man | [previews/pacman.html](previews/pacman.html) |
+| Matrix | [eriktelepovsky.github.io/…/matrix.html](https://eriktelepovsky.github.io/matrix-rain/previews/matrix.html) |
+| Rain | [eriktelepovsky.github.io/…/rain.html](https://eriktelepovsky.github.io/matrix-rain/previews/rain.html) |
+| Snow | [eriktelepovsky.github.io/…/snow.html](https://eriktelepovsky.github.io/matrix-rain/previews/snow.html) |
+| Hearts | [eriktelepovsky.github.io/…/hearts.html](https://eriktelepovsky.github.io/matrix-rain/previews/hearts.html) |
+| Pac-Man | [eriktelepovsky.github.io/…/pacman.html](https://eriktelepovsky.github.io/matrix-rain/previews/pacman.html) |
 
 ## JavaScript Library
 
